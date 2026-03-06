@@ -4,8 +4,6 @@ import { Mic, MicOff } from 'lucide-react';
 
 export default function App() {
   const [isMuted, setIsMuted] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
   const constraintsRef = useRef<HTMLDivElement>(null);
   
   const x = useMotionValue(0);
@@ -26,13 +24,7 @@ export default function App() {
     }
   };
 
-  const handleDragStart = () => {
-    setIsDragging(true);
-  };
-
   const handleDragEnd = () => {
-    setIsDragging(false);
-    
     // Snap to closest edge
     const screenWidth = window.innerWidth;
     const buttonWidth = 64; // w-16 = 64px
@@ -51,12 +43,9 @@ export default function App() {
     });
   };
 
-  // Determine opacity: 100% when dragging, hovered, or not on edge
-  const isActive = isDragging || isHovered;
-
   return (
     <div 
-      className="fixed inset-0 bg-zinc-950 overflow-hidden flex items-center justify-center font-sans"
+      className="fixed inset-0 bg-zinc-950 overflow-hidden flex items-center justify-center font-sans selection:bg-emerald-500/30"
       ref={constraintsRef}
     >
       {/* Background Content to show the overlay effect */}
@@ -96,20 +85,18 @@ export default function App() {
         dragConstraints={constraintsRef}
         dragElastic={0.1}
         dragMomentum={false}
-        onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        onPointerDown={() => setIsHovered(true)}
-        onPointerUp={() => setIsHovered(false)}
         onTap={handleToggle}
+        initial={{ opacity: 0.5, scale: 1 }}
+        animate={{ opacity: 0.5, scale: 1 }}
+        whileHover={{ opacity: 1, scale: 1.05 }}
+        whileDrag={{ opacity: 1, scale: 1.05 }}
         className={`
           absolute top-0 left-0
           w-16 h-16 rounded-full 
           flex items-center justify-center
           cursor-grab active:cursor-grabbing
-          transition-all duration-300 ease-out
-          ${isActive ? 'opacity-100 scale-105' : 'opacity-50 scale-100'}
+          transition-colors duration-300 ease-out
           ${isMuted 
             ? 'bg-red-500/20 border-red-500/30 shadow-[0_8px_32px_rgba(239,68,68,0.25)]' 
             : 'bg-white/10 border-white/20 shadow-[0_8px_32px_rgba(255,255,255,0.1)]'
